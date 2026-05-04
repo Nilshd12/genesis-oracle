@@ -16,8 +16,9 @@ def create_windows(signal, window_size=50):
     return np.array(windows)
 
 
-def split_data(signal, T, split_period=60):
-    split_index = int(split_period * T)
+def split_data(signal, periods=100, split_period=60):
+    samples_per_period = len(signal) // periods
+    split_index = split_period * samples_per_period
 
     train_signal = signal[:split_index]
     test_signal = signal[split_index:]
