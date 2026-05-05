@@ -87,3 +87,7 @@ class SignalCompression(layers.Layer):
         x = self.conv2(x)
         x = self.flatten(x)
         return self.dense(x)
+
+### Zusammenfassung
+
+Der Dense-Autoencoder konnte bereits die künstlich eingefügte Anomalie durch einen starken Anstieg des Rekonstruktionsfehlers sichtbar machen. Das Conv1D-Refactoring verbessert die Architektur konzeptionell, weil lokale zeitliche Muster direkt entlang der Signalachse verarbeitet werden. Damit ist die Conv1D-Version besser auf physikalische Zeitreihen und lokale Signalstörungen ausgerichtet.
