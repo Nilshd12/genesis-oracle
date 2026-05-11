@@ -26,3 +26,11 @@ Mit `jax.grad(projectile_loss)` wurde automatisch eine Gradientenfunktion erzeug
 Die optimierte Anfangsgeschwindigkeit lag bei ungefähr `29.999980926513672` m/s. Der theoretisch ideale Wert beträgt `30.0` m/s, da das Projektil bei konstanter Geschwindigkeit in 5 Sekunden genau `150.0` Meter zurücklegen muss.
 
 `jax.grad` unterscheidet sich grundlegend von finiten Differenzen, weil JAX die Ableitung automatisch aus dem Berechnungsgraphen der Funktion bestimmt. Bei finiten Differenzen müsste man die Funktion mehrfach mit leicht veränderten Eingabewerten ausführen und daraus nur eine numerische Näherung der Steigung berechnen. `jax.grad` liefert dagegen eine automatische, präzisere und effizientere Ableitung der definierten mathematischen Funktion.
+
+## Exercise 4: Flax and Explicit State Management
+
+Für die Flax-Aufgabe wurde mit Hilfe eines Agenten ein einfaches Multi-Layer Perceptron mit `flax.linen` erstellt. Das Modell definiert dabei nur die Architektur, also die mathematischen Operationen der Schichten. Die Gewichte werden nicht automatisch im Modellobjekt gespeichert, sondern explizit mit `model.init(...)` erzeugt.
+
+Der wichtigste Unterschied zu Keras liegt im State Management. In Keras sind Modelle typischerweise zustandsbehaftet: Nach der Initialisierung oder dem ersten Aufruf liegen die Gewichte direkt im Modellobjekt, zum Beispiel in `model.weights`. In Flax ist das Modell dagegen zustandsloser aufgebaut. Die Parameter werden als separates Objekt gespeichert und beim Forward Pass explizit mit `model.apply(variables, input_data)` übergeben.
+
+Diese Trennung passt gut zum JAX-Paradigma, weil der Zustand nicht versteckt im Objekt liegt, sondern als klar sichtbare Eingabe verwendet wird. Dadurch lassen sich Funktionen besser mit JAX-Transformationen wie `jit`, `grad` und `vmap` kombinieren.
