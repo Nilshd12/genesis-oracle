@@ -34,3 +34,5 @@ if __name__ == "__main__":
     print("Legacy simulation completed.")
     print("Number of oscillators:", len(final_x))
     print("Execution time:", elapsed, "seconds")
+
+# hat 1.1252140998840332 seconds zum ausführen gebraucht.
