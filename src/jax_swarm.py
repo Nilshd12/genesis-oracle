@@ -1,4 +1,5 @@
 import time
+from functools import partial
 
 import jax
 import jax.numpy as jnp
@@ -25,7 +26,7 @@ vectorized_step = jax.vmap(
 )
 
 
-@jax.jit
+@partial(jax.jit, static_argnames=("num_steps",))
 def simulate_jax_swarm(w, num_steps=1000, dt=0.01, damping=0.05):
     """
     JIT-compiled JAX simulation for many oscillators.
