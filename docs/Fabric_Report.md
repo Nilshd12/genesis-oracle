@@ -11,7 +11,7 @@ Das Training des Modells basiert auf drei Verlustkomponenten (Loss Components), 
 
 ## Interaktive 3D-Visualisierung
 Das trainierte PINN wurde auf einem hochauflösenden Raum-Zeit-Gitter (Space-Time-Grid) evaluiert und als 3D-Oberfläche visualisiert, um die Wärmeausbreitung über die Zeit darzustellen.
-Die interaktive Visualisierung kann hier aufgerufen werden: [Interaktive 3D-Visualisierung](../data/pinn_3d_fabric.html)
+Die interaktive Visualisierung kann hier aufgerufen werden: [Interaktive 3D-Visualisierung](../public_data/pinn_3d_fabric.html)
 
 ## Screenshot der 3D-Oberfläche
 ![PINN 3D Fabric Screenshot](pinn_3d_fabric_screenshot.png)

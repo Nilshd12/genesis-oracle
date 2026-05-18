@@ -100,4 +100,4 @@ In dieser Woche wurde ein Physics-Informed Neural Network (PINN) experimentell e
 
 Weitere Details zum Modell, zu PINN-Verlustfunktionen (Physics, Initial und Boundary Loss) sowie eine Erklärung zu Fourier Neural Operators (FNOs) sind im detaillierten Bericht dokumentiert: [Fabric Report](Fabric_Report.md).
 
-Die Ergebnisse der Approximation sind in einer interaktiven 3D-Darstellung einsehbar: [PINN 3D Fabric](../data/pinn_3d_fabric.html).
+Die Ergebnisse der Approximation sind in einer interaktiven 3D-Darstellung einsehbar: [PINN 3D Fabric](../public_data/pinn_3d_fabric.html).
