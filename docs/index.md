@@ -91,3 +91,13 @@ class SignalCompression(layers.Layer):
 ### Zusammenfassung
 
 Der Dense-Autoencoder konnte bereits die künstlich eingefügte Anomalie durch einen starken Anstieg des Rekonstruktionsfehlers sichtbar machen. Das Conv1D-Refactoring verbessert die Architektur konzeptionell, weil lokale zeitliche Muster direkt entlang der Signalachse verarbeitet werden. Damit ist die Conv1D-Version besser auf physikalische Zeitreihen und lokale Signalstörungen ausgerichtet.
+
+---
+
+## Woche 5: PINN und die Wärmeleitungsgleichung
+
+In dieser Woche wurde ein Physics-Informed Neural Network (PINN) experimentell eingesetzt, um die eindimensionale Wärmeleitungsgleichung zu approximieren. Im Gegensatz zu klassischen numerischen Verfahren lernt das Modell hierbei eine kontinuierliche Funktion u(x,t).
+
+Weitere Details zum Modell, zu PINN-Verlustfunktionen (Physics, Initial und Boundary Loss) sowie eine Erklärung zu Fourier Neural Operators (FNOs) sind im detaillierten Bericht dokumentiert: [Fabric Report](Fabric_Report.md).
+
+Die Ergebnisse der Approximation sind in einer interaktiven 3D-Darstellung einsehbar: [PINN 3D Fabric](../data/pinn_3d_fabric.html).
