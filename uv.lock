@@ -177,6 +177,7 @@ dependencies = [
     { name = "keras" },
     { name = "matplotlib" },
     { name = "numpy" },
+    { name = "optax" },
     { name = "scipy" },
 ]
 
@@ -188,6 +189,7 @@ requires-dist = [
     { name = "keras", specifier = ">=3.0.7" },
     { name = "matplotlib", specifier = ">=3.10.9" },
     { name = "numpy", specifier = ">=2.4.4" },
+    { name = "optax", specifier = ">=0.2.8" },
     { name = "scipy", specifier = ">=1.17.1" },
 ]
 
