@@ -87,7 +87,7 @@ class SignalCompression(layers.Layer):
         x = self.conv2(x)
         x = self.flatten(x)
         return self.dense(x)
-
+```
 ### Zusammenfassung
 
 Der Dense-Autoencoder konnte bereits die künstlich eingefügte Anomalie durch einen starken Anstieg des Rekonstruktionsfehlers sichtbar machen. Das Conv1D-Refactoring verbessert die Architektur konzeptionell, weil lokale zeitliche Muster direkt entlang der Signalachse verarbeitet werden. Damit ist die Conv1D-Version besser auf physikalische Zeitreihen und lokale Signalstörungen ausgerichtet.
@@ -101,3 +101,7 @@ In dieser Woche wurde ein Physics-Informed Neural Network (PINN) experimentell e
 Weitere Details zum Modell, zu PINN-Verlustfunktionen (Physics, Initial und Boundary Loss) sowie eine Erklärung zu Fourier Neural Operators (FNOs) sind im detaillierten Bericht dokumentiert: [Fabric Report](Fabric_Report.md).
 
 Die Ergebnisse der Approximation sind in einer interaktiven 3D-Darstellung einsehbar: [PINN 3D Fabric](pinn_3d_fabric.html).
+
+## Woche 6: 
+
+Für die Markov-Chain-Simulation wurde Module Alpha (The Matrix Carrier) gewählt, da ein aggregierter Wahrscheinlichkeitsvektor effizient mit `jax.lax.scan` über die gesamte 365-Tage-Zeitachse fortgeschrieben werden kann. Während des Black-Swan-Schocks verschiebt sich ein großer Teil der Wahrscheinlichkeit aus Bull Market und Stagnation in die Catastrophic Recession, wodurch die stabile Ausgangslage des Unternehmens stark gestört wird. Wenn die Zufallsvariablen aus der Monte-Carlo-Simulation direkt an diese Markov-Zustände gekoppelt wären, würden Nachfrage, Strafraten und Kosten während der Rezession gleichzeitig ungünstiger ausfallen, sodass der erwartete Cashflow und insbesondere der VaR deutlich einbrechen würden.
