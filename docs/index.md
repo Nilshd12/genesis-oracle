@@ -110,7 +110,7 @@ In Woche 6 wurde das Projekt um stochastische Simulationen erweitert. Ziel war e
 
 Zunächst wurde mit `src/classical_pi.py` eine klassische NumPy-basierte Monte-Carlo-Schätzung von Pi umgesetzt. Dabei wurden zufällige Punkte im Einheitsquadrat erzeugt und geprüft, ob sie innerhalb des Viertelkreises liegen. Der daraus berechnete Pi-Wert lag bei ungefähr `3.141736`, bei einer gemessenen Ausführungszeit von etwa `0.2262` Sekunden.
 
-![Classical Pi Estimation](../assets/classical_pi_disp.png)
+![Classical Pi Estimation](assets/classical_pi_disp.png)
 
 ### JAX Monte Carlo Revenue Simulation
 
@@ -121,7 +121,7 @@ Die gemessenen Ergebnisse waren:
 * Erwarteter Umsatz: `149751.71875`
 * Value-at-Risk 95%-Schwelle: `112734.46875`
 
-![Revenue Distribution](../assets/revenue_dist.png)
+![Revenue Distribution](assets/revenue_dist.png)
 
 ### Agentic Stress Testing mit Antigravity
 
@@ -153,7 +153,7 @@ Die finale Verteilung an Tag 365 war:
 * Stagnation: `38.30%`
 * Catastrophic Recession: `27.13%`
 
-![Markov Boss Black Swan Simulation](../assets/markov_boss.png)
+![Markov Boss Black Swan Simulation](assets/markov_boss.png)
 
 Wenn die Zufallsvariablen aus der Monte-Carlo-Simulation direkt an diese Markov-Zustände gekoppelt wären, würde die Cash-Flow-Struktur während des Rezessionsspikes stark einbrechen. In einer Catastrophic Recession wären Nachfrage, Kosten und regulatorische Risiken gleichzeitig ungünstiger, wodurch der erwartete Umsatz sinken und der Value-at-Risk deutlich schlechter ausfallen würde. Besonders gefährlich wäre die Kombination aus sinkender Nachfrage und steigenden Extremkosten, weil dadurch selbst zuvor stabile Umsatzverteilungen in den Verlustbereich kippen könnten.
 
