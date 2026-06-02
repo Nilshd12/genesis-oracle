@@ -102,6 +102,61 @@ Weitere Details zum Modell, zu PINN-Verlustfunktionen (Physics, Initial und Boun
 
 Die Ergebnisse der Approximation sind in einer interaktiven 3D-Darstellung einsehbar: [PINN 3D Fabric](pinn_3d_fabric.html).
 
-## Woche 6: 
+## Woche 6: The Chaos Engine – Monte Carlo, Agentic Stress Testing und Markov Chains
 
-Für die Markov-Chain-Simulation wurde Module Alpha (The Matrix Carrier) gewählt, da ein aggregierter Wahrscheinlichkeitsvektor effizient mit `jax.lax.scan` über die gesamte 365-Tage-Zeitachse fortgeschrieben werden kann. Während des Black-Swan-Schocks verschiebt sich ein großer Teil der Wahrscheinlichkeit aus Bull Market und Stagnation in die Catastrophic Recession, wodurch die stabile Ausgangslage des Unternehmens stark gestört wird. Wenn die Zufallsvariablen aus der Monte-Carlo-Simulation direkt an diese Markov-Zustände gekoppelt wären, würden Nachfrage, Strafraten und Kosten während der Rezession gleichzeitig ungünstiger ausfallen, sodass der erwartete Cashflow und insbesondere der VaR deutlich einbrechen würden.
+In Woche 6 wurde das Projekt um stochastische Simulationen erweitert. Ziel war es, klassische Monte-Carlo-Verfahren mit NumPy, eine massiv vektorisierte JAX-Monte-Carlo-Simulation und eine Markov-Chain-basierte Black-Swan-Simulation umzusetzen. Dabei wurde untersucht, wie Unsicherheit, Kostenrisiken und makroökonomische Zustandswechsel die Stabilität eines simulierten Unternehmens beeinflussen können.
+
+### Classical Monte Carlo Pi Estimation
+
+Zunächst wurde mit `src/classical_pi.py` eine klassische NumPy-basierte Monte-Carlo-Schätzung von Pi umgesetzt. Dabei wurden zufällige Punkte im Einheitsquadrat erzeugt und geprüft, ob sie innerhalb des Viertelkreises liegen. Der daraus berechnete Pi-Wert lag bei ungefähr `3.141736`, bei einer gemessenen Ausführungszeit von etwa `0.2262` Sekunden.
+
+![Classical Pi Estimation](../public_data/classical_pi_disp.png)
+
+### JAX Monte Carlo Revenue Simulation
+
+Anschließend wurde mit `src/monte_carlo.py` eine JAX-basierte Monte-Carlo-Simulation für ein stochastisches Geschäftsmodell erstellt. Die Simulation verwendet 1.000.000 parallele Pfade und modelliert Marktnachfrage, Produktionskosten und regulatorische Strafraten als Zufallsvariablen. Daraus wurden der erwartete Umsatz und der Value-at-Risk berechnet.
+
+Die gemessenen Ergebnisse waren:
+
+* Erwarteter Umsatz: `149751.71875`
+* Value-at-Risk 95%-Schwelle: `112734.46875`
+
+![Revenue Distribution](../public_data/revenue_dist.png)
+
+### Agentic Stress Testing mit Antigravity
+
+Für den agentischen Stresstest wurde Antigravity genutzt, um den Monte-Carlo-Code automatisiert analysieren zu lassen. Subagent-Alpha untersuchte dabei, ab welchem Sigma-Wert der Log-Normal-Kostenverteilung der VaR 95% unter null fällt. Subagent-Beta analysierte die JAX-Ausführungszeiten und verglich den initialen Kompilierungslauf mit dem zweiten warmen Lauf.
+
+Der vollständige Report befindet sich hier:
+
+[Swarm Stress Report](Swarm_Stress_Report.md)
+
+### Markov Boss Fight: Black Swan Simulation
+
+Für die Markov-Chain-Simulation wurde **Module Alpha (The Matrix Carrier)** gewählt. Dabei wird ein aggregierter Wahrscheinlichkeitsvektor mit `jax.lax.scan` über 365 Tage fortgeschrieben. Die drei Zustände sind:
+
+1. Bull Market
+2. Stagnation
+3. Catastrophic Recession
+
+Während des Black-Swan-Schocks zwischen Tag 180 und Tag 190 wird ein großer Teil der Wahrscheinlichkeit aus Bull Market und Stagnation in die Catastrophic Recession verschoben. Nach dem Schock kehrt die Simulation zur Basismatrix zurück, wodurch eine teilweise Erholung sichtbar wird.
+
+Die gemessene Verteilung direkt nach dem Schock an Tag 190 war:
+
+* Bull Market: `6.19%`
+* Stagnation: `17.62%`
+* Catastrophic Recession: `76.19%`
+
+Die finale Verteilung an Tag 365 war:
+
+* Bull Market: `34.57%`
+* Stagnation: `38.30%`
+* Catastrophic Recession: `27.13%`
+
+![Markov Boss Black Swan Simulation](../public_data/markov_boss.png)
+
+Wenn die Zufallsvariablen aus der Monte-Carlo-Simulation direkt an diese Markov-Zustände gekoppelt wären, würde die Cash-Flow-Struktur während des Rezessionsspikes stark einbrechen. In einer Catastrophic Recession wären Nachfrage, Kosten und regulatorische Risiken gleichzeitig ungünstiger, wodurch der erwartete Umsatz sinken und der Value-at-Risk deutlich schlechter ausfallen würde. Besonders gefährlich wäre die Kombination aus sinkender Nachfrage und steigenden Extremkosten, weil dadurch selbst zuvor stabile Umsatzverteilungen in den Verlustbereich kippen könnten.
+
+### Zusammenfassung
+
+Die Chaos Engine zeigt, wie klassische Zufallssimulationen, JAX-basierte Parallelisierung, agentische Analyse und Markov Chains zusammen genutzt werden können, um stochastische Risiken zu untersuchen. Während die Monte-Carlo-Simulation einzelne wirtschaftliche Unsicherheiten modelliert, erweitert die Markov Chain das System um zeitabhängige makroökonomische Zustandswechsel. Dadurch wird sichtbar, wie ein Black-Swan-Ereignis kurzfristig extreme Risiken erzeugt und wie sich das System danach nur langsam erholt.
