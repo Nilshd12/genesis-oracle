@@ -160,3 +160,10 @@ Wenn die Zufallsvariablen aus der Monte-Carlo-Simulation direkt an diese Markov-
 ### Zusammenfassung
 
 Die Chaos Engine zeigt, wie klassische Zufallssimulationen, JAX-basierte Parallelisierung, agentische Analyse und Markov Chains zusammen genutzt werden können, um stochastische Risiken zu untersuchen. Während die Monte-Carlo-Simulation einzelne wirtschaftliche Unsicherheiten modelliert, erweitert die Markov Chain das System um zeitabhängige makroökonomische Zustandswechsel. Dadurch wird sichtbar, wie ein Black-Swan-Ereignis kurzfristig extreme Risiken erzeugt und wie sich das System danach nur langsam erholt.
+
+
+## Woche 7: Cerebral Nexus
+
+In Woche 7 wurde das Projekt um eine Gemini-basierte Kontroll- und Analyseebene erweitert. Die Simulationen können nun visuell auditiert, über strukturierte JSON-Entscheidungen gesteuert und gegen Prompt-Injection-Angriffe abgesichert werden.
+
+[Zum Cerebral Nexus Report](Cerebral_Nexus_Report.md)
