@@ -1,0 +1,8 @@
+{
+  "model": "google/gemma-4-e2b-it",
+  "method": "LoRA fine-tuning",
+  "target": "Sovereign Sentinel industrial control behavior",
+  "runtime": "Google Colab T4 GPU via Colab CLI",
+  "status": "pipeline scaffold completed",
+  "note": "This scaffold represents the remote fine-tuning entry point. A real Colab run would initialize Gemma 4 with Keras/KerasHub and save LoRA adapters here."
+}
