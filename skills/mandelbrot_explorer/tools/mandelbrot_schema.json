@@ -1,0 +1,31 @@
+{
+"name": "simulate_mandelbrot",
+"description": "Runs a local JAX-accelerated Mandelbrot simulation and returns entropy, boundary complexity, coordinates, zoom, and iteration settings.",
+"parameters": {
+"type": "object",
+"properties": {
+"center_real": {
+"type": "number",
+"description": "Real coordinate of the viewport center."
+},
+"center_imag": {
+"type": "number",
+"description": "Imaginary coordinate of the viewport center."
+},
+"zoom": {
+"type": "number",
+"description": "Positive zoom factor for the Mandelbrot viewport."
+},
+"max_iterations": {
+"type": "integer",
+"description": "Maximum number of iterations used for the escape-time calculation.",
+"default": 500
+}
+},
+"required": [
+"center_real",
+"center_imag",
+"zoom"
+]
+}
+}
