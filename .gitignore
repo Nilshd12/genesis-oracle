@@ -13,3 +13,6 @@ data/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Local ADK runtime data
+.adk/

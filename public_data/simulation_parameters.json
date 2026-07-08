@@ -1,0 +1,39 @@
+{
+  "agent": "scholar_prime",
+  "search_query": "thermodynamic simulation parameters for advanced fission reactors",
+  "source_paper": {
+    "title": "Microscopic Description of Nuclear Fission: Fission Barrier Heights of Even-Even Actinides",
+    "authors": [
+      "J. McDonnell",
+      "N. Schunck",
+      "W. Nazarewicz"
+    ],
+    "doi": "10.1142/9789814525435_0072",
+    "arxiv_id": "1301.7587v1",
+    "pdf_url": "https://arxiv.org/pdf/1301.7587v1",
+    "published": "2013-01-31T12:21:42Z",
+    "abstract": "We evaluate the performance of modern nuclear energy density functionals for predicting inner and outer fission barrier heights and energies of fission isomers of even-even actinides. For isomer energies and outer barrier heights, we find that the self-consistent theory at the HFB level is capable of providing quantitative agreement with empirical data."
+  },
+  "extraction": {
+    "status": "success",
+    "parameters_found": 2,
+    "parameters": [
+      {
+        "name": "fission_barrier_height",
+        "value": null,
+        "unit": "MeV",
+        "status": "mentioned_without_numeric_value",
+        "evidence": "r energy density functionals for predicting inner and outer fission barrier heights and energies of fission isomers of even-even actinides. For isomer energies and outer barrier heights, we find that the"
+      },
+      {
+        "name": "fission_isomer_energy",
+        "value": null,
+        "unit": "MeV",
+        "status": "mentioned_without_numeric_value",
+        "evidence": "and energies of fission isomers of even-even actinides. For isomer energies and outer barrier heights, we find that the self-consistent theory at the HFB level is capable of providing quantitativ"
+      }
+    ],
+    "formulas": [],
+    "note": "Parameters without explicit numerical values are stored with value null instead of being invented."
+  }
+}
