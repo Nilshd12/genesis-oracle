@@ -1,0 +1,5 @@
+Notification recorded 2026-07-10 (Europe/Berlin):
+
+Users of the DeepMind literature-search-openalex skill must review the OpenAlex
+API terms at https://developers.openalex.org/ and must check the license of each
+retrieved paper for applicable restrictions.

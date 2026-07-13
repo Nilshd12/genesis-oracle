@@ -1,0 +1,23 @@
+{
+  "title": "Thermal conductivities of some novel nonlinear optical materials",
+  "authors": [
+    "J. Donald Beasley"
+  ],
+  "publication_year": 1994,
+  "doi": "10.1364/AO.33.001000",
+  "source_url": "https://doi.org/10.1364/AO.33.001000",
+  "source_repository": "Local verified fixture based on the cited publication",
+  "source_excerpt": "The abstract reports AgGaS2 thermal conductivities of 0.014 W/(cm K) and 0.015 W/(cm K), respectively parallel and perpendicular to the optic axis.",
+  "parameter_names": [
+    "AgGaS2 thermal conductivity parallel to optic axis",
+    "AgGaS2 thermal conductivity perpendicular to optic axis"
+  ],
+  "source_values": {
+    "parallel": 0.014,
+    "perpendicular": 0.015
+  },
+  "source_unit": "W/(cm*K)",
+  "retrieved_at": "2026-07-10T00:00:00Z",
+  "retrieval_mode": "fixture",
+  "science_skill_used": null
+}
