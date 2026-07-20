@@ -1,0 +1,29 @@
+{
+  "name": "Lausitz Produce Wholesale",
+  "description": "Large agricultural wholesaler serving Brandenburg.",
+  "supportedInterfaces": [
+    {
+      "url": "local://lausitz-supplier",
+      "protocolBinding": "HTTP+JSON",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "produce-wholesale",
+      "name": "Produce wholesale",
+      "description": "Quotes organic produce in bulk with delivery to Brandenburg destinations.",
+      "tags": ["commerce", "gherkin-wholesale", "organic"],
+      "examples": ["Quote 2000 kg organic gherkins delivered to Cottbus."],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ]
+}

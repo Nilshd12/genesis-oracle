@@ -1,0 +1,137 @@
+{
+  "name": "Spreeland Delivery Status Card",
+  "description": "A2UI v1.0 delivery dashboard card for the Spreeland dispatcher.",
+  "messages": [
+    {
+      "version": "v1.0",
+      "createSurface": {
+        "surfaceId": "spreeland-delivery-status-001",
+        "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+        "surfaceProperties": {
+          "agentDisplayName": "Spreeland Dispatcher"
+        },
+        "sendDataModel": true,
+        "components": [
+          {
+            "id": "root",
+            "component": "Card",
+            "child": "content"
+          },
+          {
+            "id": "content",
+            "component": "Column",
+            "children": [
+              "title",
+              "status",
+              "divider_1",
+              "route_row",
+              "bridge_row",
+              "eta_row",
+              "weather_row",
+              "divider_2",
+              "supplier_row",
+              "cargo_row",
+              "total_row",
+              "authorization"
+            ]
+          },
+          {
+            "id": "title",
+            "component": "Text",
+            "text": {"path": "/title"}
+          },
+          {
+            "id": "status",
+            "component": "Text",
+            "text": {
+              "call": "formatString",
+              "args": {"value": "Status: ${/status}"}
+            }
+          },
+          {
+            "id": "divider_1",
+            "component": "Divider"
+          },
+          {
+            "id": "route_row",
+            "component": "Text",
+            "text": {
+              "call": "formatString",
+              "args": {"value": "Route: ${/route}"}
+            }
+          },
+          {
+            "id": "bridge_row",
+            "component": "Text",
+            "text": {
+              "call": "formatString",
+              "args": {"value": "Bridge: ${/bridge}"}
+            }
+          },
+          {
+            "id": "eta_row",
+            "component": "Text",
+            "text": {
+              "call": "formatString",
+              "args": {"value": "ETA: ${/eta}"}
+            }
+          },
+          {
+            "id": "weather_row",
+            "component": "Text",
+            "text": {
+              "call": "formatString",
+              "args": {"value": "Weather: ${/weather}"}
+            }
+          },
+          {
+            "id": "divider_2",
+            "component": "Divider"
+          },
+          {
+            "id": "supplier_row",
+            "component": "Text",
+            "text": {
+              "call": "formatString",
+              "args": {"value": "Supplier: ${/supplier}"}
+            }
+          },
+          {
+            "id": "cargo_row",
+            "component": "Text",
+            "text": {
+              "call": "formatString",
+              "args": {"value": "Cargo: ${/cargo}"}
+            }
+          },
+          {
+            "id": "total_row",
+            "component": "Text",
+            "text": {
+              "call": "formatString",
+              "args": {"value": "Total: ${/total}"}
+            }
+          },
+          {
+            "id": "authorization",
+            "component": "Text",
+            "text": {"path": "/authorization"},
+            "variant": "caption"
+          }
+        ],
+        "dataModel": {
+          "title": "Spreeland Delivery Status",
+          "status": "AUTHORIZED (course demo)",
+          "route": "Burg-Cottbus via Luebbenau",
+          "bridge": "Nordumfahrung Luebbenau",
+          "eta": "52 minutes",
+          "weather": "Moderate rain; low route risk.",
+          "supplier": "Bio-Spree Cooperative",
+          "cargo": "2,000 kg organic gherkins",
+          "total": "3790.00 EUR",
+          "authorization": "Demo signature verified; production requires AP2 Trusted Surface"
+        }
+      }
+    }
+  ]
+}

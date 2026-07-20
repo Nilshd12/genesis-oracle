@@ -1,0 +1,29 @@
+{
+  "name": "Spreeland Weather Predictor",
+  "description": "Predicts route-specific weather and river-level risks in Spreeland.",
+  "supportedInterfaces": [
+    {
+      "url": "local://weather-predictor",
+      "protocolBinding": "HTTP+JSON",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false
+  },
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "spreeland-route-weather-v1",
+      "name": "Route weather risk",
+      "description": "Returns route-specific weather and river risk for a delivery window.",
+      "tags": ["weather", "route-weather", "river-level"],
+      "examples": ["Assess weather risk for Burg to Cottbus at 16:00."],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ]
+}

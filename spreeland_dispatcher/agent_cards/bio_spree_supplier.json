@@ -1,0 +1,29 @@
+{
+  "name": "Bio-Spree Cooperative",
+  "description": "Regional certified-organic wholesale supplier.",
+  "supportedInterfaces": [
+    {
+      "url": "local://bio-spree-supplier",
+      "protocolBinding": "HTTP+JSON",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "organic-gherkin-wholesale",
+      "name": "Organic gherkin wholesale",
+      "description": "Quotes certified-organic gherkins by kilogram for regional delivery.",
+      "tags": ["commerce", "gherkin-wholesale", "organic"],
+      "examples": ["Quote 2000 kg organic gherkins delivered to Cottbus."],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ]
+}
