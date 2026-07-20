@@ -5,17 +5,13 @@
 \usepackage{geometry}
 \usepackage{xcolor}
 \usepackage{booktabs}
-\usepackage{longtable}
-\usepackage{enumitem}
-\usepackage{listings}
 \usepackage{hyperref}
-\geometry{left=24mm,right=24mm,top=22mm,bottom=24mm}
-\hypersetup{colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!55!black}
-\setlist{nosep,leftmargin=*}
+\usepackage{listings}
+\geometry{left=25mm,right=25mm,top=22mm,bottom=23mm}
+\hypersetup{colorlinks=true,urlcolor=blue!55!black,linkcolor=blue!45!black}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.55em}
+\setlength{\parskip}{0.45em}
 \definecolor{codebg}{RGB}{246,248,250}
-\definecolor{accent}{RGB}{24,91,110}
 \lstset{
   basicstyle=\ttfamily\small,
   backgroundcolor=\color{codebg},
@@ -23,422 +19,181 @@
   framerule=0.2pt,
   breaklines=true,
   columns=fullflexible,
-  showstringspaces=false,
-  keywordstyle=\color{accent}\bfseries
+  showstringspaces=false
 }
 
+\title{\textbf{Problem Set 12}\\[0.25em]
+\large The Great Spreeland Logistics Sync}
+\author{Nils Schön\\Angewandte Modellierung und Systemsimulation}
+\date{Sommersemester 2026}
+
 \begin{document}
+\maketitle
 
-\begin{titlepage}
-  \centering
-  {\Large Angewandte Modellierung und Systemsimulation\par}
-  \vspace{1.6cm}
-  {\Huge\bfseries Problem Set 12\par}
-  \vspace{0.4cm}
-  {\LARGE The Great Spreeland Logistics Sync\par}
-  \vspace{1.0cm}
-  {\large Protokollarchitektur, Dispatcher-Swarm und dynamische UI\par}
-  \vfill
-  \begin{tabular}{ll}
-    Bearbeiter: & Nils Schön\\
-    Semester: & Sommersemester 2026\\
-    Stand: & 20. Juli 2026\\
-    Implementierung: & Google ADK 2.3.0, MCP 1.28.1, Python 3.13
-  \end{tabular}
-  \vfill
-  {\small Die Implementierung ist vollständig im Verzeichnis
-  \texttt{spreeland\_dispatcher/} enthalten.}
-\end{titlepage}
+\section{Protocol Architecture Design}
 
-\tableofcontents
-\newpage
+Für die Lieferkette von Burg/Spreewald nach Cottbus werden die sechs
+Protokolle als komplementäre Schichten eingesetzt. MCP verbindet den
+Dispatcher mit Werkzeugen und Daten, A2A mit fremden Agenten, UCP mit dem
+Handelsprozess und AP2 mit der Zahlungsautorisierung. A2UI beschreibt die
+Benutzeroberfläche; AG-UI transportiert laufende Ereignisse zwischen Agent
+und Frontend.
 
-\section{Ziel und Systemgrenze}
-
-Ziel ist ein resilienter Logistikprozess für 2\,t Bio-Gurken von
-Burg/Spreewald nach Cottbus. Der Dispatcher darf eine Route erst freigeben,
-wenn aktuelle Infrastruktur- und Wetterdaten vorliegen. Er soll externe
-Lieferanten anhand deklarierter Fähigkeiten finden, ein gültiges Angebot
-auswählen und einen Checkout nur innerhalb einer nachweisbaren
-Eigentümerautorisierung zulassen. Der Benutzer erhält währenddessen einen
-Ereignisstrom und abschließend eine native Statuskarte.
-
-Die sechs Protokolle lösen unterschiedliche Kopplungsprobleme. Sie sind keine
-Konkurrenten, sondern bilden einen Stack:
-
-\begin{longtable}{p{0.15\textwidth}p{0.24\textwidth}p{0.52\textwidth}}
+\begin{center}
+\begin{tabular}{lll}
 \toprule
-\textbf{Protokoll} & \textbf{Grenze} & \textbf{Aufgabe im Szenario}\\
+\textbf{Interaktion} & \textbf{Protokoll} & \textbf{Aufgabe}\\
 \midrule
-MCP & Agent--Tool/Daten & Discovery und Aufruf read-only Brückenwerkzeuge\\
-A2A & Agent--Agent & Discovery von Wetter- und Lieferantenagenten, Aufgabenstatus\\
-UCP & Commerce & Produkt, Angebot, Warenkorb, Checkout und Bestellstatus\\
-AP2 & Autorisierung & Kryptographischer Beleg für Checkout und Zahlung\\
-A2UI & UI-Beschreibung & Deklarative, frameworkunabhängige Lieferkarte\\
-AG-UI & Agent--Frontend & Geordneter bidirektionaler Ereignisstrom\\
+Brückendaten & MCP & Tool-Discovery und Datenabfrage\\
+Wetterexperte & A2A & Agent-Discovery und Delegation\\
+Beschaffung & UCP + AP2 & Checkout und Autorisierung\\
+Live-Dashboard & A2UI + AG-UI & UI-Schema und Streaming\\
 \bottomrule
-\end{longtable}
-
-\subsection{Architekturübersicht}
-
-\begin{figure}[h]
-\centering
-\fbox{\begin{minipage}{0.92\textwidth}
-\centering
-\textbf{A2UI-Renderer / Benutzeroberfläche}\\
-$\updownarrow$ \quad AG-UI-Ereignisse, Eingaben, Freigabe \quad $\updownarrow$\\[0.3em]
-\textbf{Spreeland Dispatcher (Google ADK)}\\
-\begin{tabular}{ccc}
-$\swarrow$ MCP & $\downarrow$ A2A & $\searrow$ UCP + AP2\\
-Stadt-Brückendaten & Wetter- und Lieferagenten & Händler, Trusted Surface, PSP
 \end{tabular}
-\end{minipage}}
-\caption{Schichten und Vertrauensgrenzen des Systems}
-\end{figure}
+\end{center}
 
-MCP hält Datenzugriff aus der Agentenlogik heraus. A2A behandelt entfernte
-Agenten als opake Dienste: Der Dispatcher benötigt weder deren Prompts noch
-deren Speicher. UCP und AP2 werden getrennt betrachtet: UCP beschreibt, was
-gekauft und wie der Checkout abgewickelt wird; AP2 beweist, wer genau diesen
-Checkout und die Zahlung autorisiert hat. A2UI beschreibt die Ansicht als
-Daten, während AG-UI deren Transport und laufende Statusereignisse übernimmt.
+\subsection{1. Infrastructure Discovery: MCP}
 
-\section{Exercise 1: Protocol Architecture Design}
+Der Dispatch Agent greift nicht direkt auf die PostgreSQL-Datenbank der Stadt
+zu. Stattdessen veröffentlicht ein MCP-Server ein klar begrenztes Werkzeug
+wie \texttt{get\_bridge\_status}. Nach dem Verbindungsaufbau fragt der Client
+mit \texttt{tools/list} die verfügbaren Werkzeuge ab und ruft das passende
+Werkzeug anschließend mit \texttt{tools/call} auf. Die Antwort enthält
+Brückenstatus, Traglast, Wartungsfenster und Beobachtungszeit. Dieses Vorgehen
+entspricht der Discovery- und Aufruftrennung der MCP-Toolspezifikation
+\cite{mcp}.
 
-\subsection{1. Infrastructure Discovery mit MCP}
+Für den realen Betrieb sollte der MCP-Server einen read-only
+Datenbankbenutzer und parametrisierte Abfragen verwenden. Zugangsdaten dürfen
+nicht im Prompt oder Quelltext stehen. In der beigefügten Demonstration wird
+die nicht zugängliche städtische Datenbank durch drei lokale Datensätze
+ersetzt. Tool-Discovery und MCP-Aufruf werden jedoch tatsächlich über einen
+stdio-MCP-Prozess ausgeführt.
 
-Der Dispatch Agent ist MCP-Host/Client. Ein Infrastruktur-MCP-Server läuft
-nahe an der städtischen PostgreSQL-Datenbank und veröffentlicht mindestens
-\texttt{get\_bridge\_status(route?)} und
-\texttt{get\_route\_capacity(route, vehicle\_weight\_t)}. Nach
-\texttt{initialize} sendet der Client \texttt{tools/list}. Erst das Ergebnis
-dieser Discovery wird dem Modell als erlaubtes Toolset angeboten. Für die
-Routenentscheidung folgt ein \texttt{tools/call}; zurückgegeben werden Status,
-Traglast, Wartungsfenster, Beobachtungszeit und Datenherkunft. Genau diese
-List/Call-Trennung ist in der MCP-Toolspezifikation vorgesehen
-\cite{mcp-tools}.
+\subsection{2. Expert Consultation: A2A}
 
-\textbf{Sicherheitsentwurf:}
+Der Weather-Predictor stellt eine A2A Agent Card bereit. Sie beschreibt Name,
+Endpunkt, Protokollversion, unterstützte Ein- und Ausgabeformate sowie Skills.
+Der Dispatcher sucht nach einem Skill mit dem Tag
+\texttt{route-weather}, prüft die Streaming-Fähigkeit und sendet Region,
+Route und Lieferfenster an das kompatible Interface. Dadurch kann ein Agent
+eines anderen Teams verwendet werden, ohne dessen interne Implementierung
+kennen zu müssen.
 
-\begin{itemize}
-  \item Der Datenbanknutzer erhält ausschließlich \texttt{SELECT}-Rechte auf
-        eine freigegebene View; Eingaben werden parametrisiert.
-  \item Im Produktionsbetrieb wird Streamable HTTP mit TLS, kurzlebiger
-        Workload-Identität und serverseitiger Autorisierung verwendet. Für die
-        lokale Abgabe ist stdio geeigneter, weil keine Ports oder Secrets
-        erforderlich sind.
-  \item API- und Datenbank-Schlüssel stehen niemals in Prompt, Agent Card oder
-        Quelltext. Sie kommen aus Umgebungsvariablen bzw. Secret Manager.
-  \item Toolantworten sind nicht automatisch vertrauenswürdig. Der
-        Dispatcher validiert Schema, Aktualität, Statuswert und Traglast
-        deterministisch.
-  \item Ein stdio-Server schreibt Protokollframes auf stdout und Logs nur auf
-        stderr, damit der Transport nicht beschädigt wird.
-\end{itemize}
+Die A2A-Spezifikation verwendet Agent Cards genau für diese
+Fähigkeitsbeschreibung und definiert Nachrichten, Tasks und optionale
+Streaming-Updates \cite{a2a}. Die Python-Demo enthält eine Wetterkarte und
+zwei Lieferantenkarten im A2A-1.0-Format. Da keine externen A2A-Server
+bereitgestellt wurden, beantwortet ein lokaler Adapter die Nachrichten
+deterministisch.
 
-Die Abgabe implementiert diesen Ablauf tatsächlich: Ein lokaler MCP-Prozess
-wird gestartet, beide Werkzeuge werden entdeckt und
-\texttt{get\_bridge\_status} wird aufgerufen. Die in-memory Datensätze ersetzen
-nur die nicht zugängliche städtische Datenbank.
+\subsection{3. Secure Fulfillment: UCP und AP2}
 
-\subsection{2. Expert Consultation mit A2A}
+UCP und AP2 erfüllen verschiedene Aufgaben. UCP standardisiert Produkt,
+Warenkorb und Checkout. Der Lieferant veröffentlicht ein UCP-Profil; der
+Dispatcher erzeugt eine Checkout-Session für exakt 2\,000 kg Bio-Gurken und
+erhält Preis, Fracht, Lieferbedingungen und die finale Bestellung
+\cite{ucp}.
 
-Der fremde Weather-Predictor stellt eine Agent Card am standardisierten
-Well-Known-Endpunkt \texttt{/.well-known/agent-card.json} bereit. Sie enthält
-Identität, unterstützte Interfaces, Protokollversion, Streamingfähigkeit und
-Skills. Der Dispatcher:
+AP2 ergänzt den Checkout um kryptographisch prüfbare Autorisierung. Der
+Eigentümer bestätigt auf einer vertrauenswürdigen Oberfläche Händler, Ware,
+Menge, Höchstbetrag, Währung und Gültigkeitszeit. Ein Checkout Mandate wird an
+den finalen, vom Händler bestätigten Checkout gebunden. Das Payment Mandate
+autorisiert anschließend den konkreten Betrag und das Zahlungsmittel.
+Händler und Zahlungsdienstleister prüfen Signaturen, Ablaufzeit und
+Checkout-Bindung. Dadurch ist belegbar, dass der Agent nur den freigegebenen
+Kauf ausgeführt hat \cite{ap2}.
 
-\begin{enumerate}
-  \item lädt und validiert die Karte, prüft HTTPS, Herkunft und gegebenenfalls
-        ihre JWS-Signatur;
-  \item sucht einen Skill mit Tags wie \texttt{route-weather} und prüft
-        Ein-/Ausgabe-Medientypen;
-  \item wählt das erste kompatible Interface in der Präferenzreihenfolge;
-  \item sendet Region, Route und Lieferfenster als A2A-Nachricht;
-  \item verarbeitet bei deklariertem Streaming Status- und Artefakt-Updates,
-        bis ein terminaler Taskzustand erreicht ist.
-\end{enumerate}
+Die lokale Demonstration prüft ein Budget von 4\,000 EUR sowie Warenkorb-Hash
+und Manipulationsschutz. Sie ist ausdrücklich als Kursdemo markiert und nicht
+als echte AP2-Zahlung. Eine reale Bestellung dürfte erst nach einer
+Eigentümersignatur über eine AP2 Trusted Surface abgeschlossen werden.
 
-Die A2A-Spezifikation definiert Agent Cards gerade für diese
-Fähigkeits-Discovery und trennt Nachrichten, Tasks, Artefakte und Streaming
-\cite{a2a-spec,a2a-discovery}. Statische Zugangsdaten gehören nicht in eine
-Agent Card. In der lokalen Abgabe folgen drei JSON-Karten dem A2A-1.0-Schema;
-ein deterministischer Adapter ersetzt den externen HTTPS-Endpunkt. Die
-Auswahllogik bleibt beim Austausch des Adapters unverändert.
+\subsection{4. Dynamic Visualization: A2UI und AG-UI}
 
-\subsection{3. Secure Fulfillment mit UCP und AP2}
+Die Lieferansicht wird nicht als generierter React- oder Flutter-Code
+übertragen. Der Agent sendet eine deklarative A2UI-Nachricht mit einer
+\texttt{Card}, einer \texttt{Column}, mehreren \texttt{Text}-Komponenten und
+einem getrennten Datenmodell. Der Client bildet diese bekannten Komponenten
+auf seine nativen Widgets ab. Das Schema kann deshalb in verschiedenen
+Frontends gerendert werden und enthält keinen beliebigen ausführbaren Code
+\cite{a2ui}.
 
-Die Bestellung benötigt \emph{beide} Protokolle:
-
-\begin{enumerate}
-  \item \textbf{UCP-Discovery:} Der Lieferant veröffentlicht sein UCP-Profil.
-        Der Dispatcher prüft Version, Checkout-Fähigkeit, Bezahlhandler und
-        Signaturschlüssel.
-  \item \textbf{Checkout:} Der Agent erzeugt eine Session mit exakt
-        2\,000\,kg Bio-Gurken, Lieferziel Cottbus, Preis, Fracht, Steuer,
-        Lieferfenster und einer Idempotency-ID. Der Händler gibt den
-        finalisierten Checkout signiert zurück. UCP standardisiert Erzeugung,
-        Aktualisierung und Abschluss der Checkout-Session
-        \cite{ucp-overview,ucp-guide}.
-  \item \textbf{AP2 Checkout Mandate:} Ein Hash bindet die Autorisierung an den
-        händlersignierten, finalen Checkout. Der Eigentümer bestätigt auf
-        einer Trusted Surface Händler, Ware, Menge, Gesamtpreis, Währung und
-        Ablaufzeit. Damit kann der Händler prüfen, dass der Agent genau diesen
-        Checkout kaufen darf.
-  \item \textbf{AP2 Payment Mandate:} Eine zweite Autorisierung bindet das
-        gewählte Zahlungsmittel und den exakten Betrag an denselben
-        Checkout-Hash. Credential Provider, Netzwerk und Payment Processor
-        verifizieren Signatur, Key Binding, Gültigkeit, Nonce und Constraints.
-  \item \textbf{Receipt und Audit:} Signierte Checkout- und Payment-Receipts,
-        Mandate-IDs, Checkout-Hash, UCP-Order-ID und Zeitstempel werden
-        revisionssicher gespeichert. Wiederholungen mit derselben
-        Idempotency-ID dürfen keine zweite Bestellung auslösen.
-\end{enumerate}
-
-AP2 unterscheidet Human-Present und Human-Not-Present. Für eine unmittelbare
-Bestellung ist eine geschlossene, vom Benutzer bestätigte Autorisierung
-passend. Bei autonomer Beschaffung muss der Eigentümer vorher offene Mandates
-mit harten Grenzen signieren, beispielsweise \glqq maximal 4\,000 EUR,
-ausschließlich zertifizierte Bio-Gurken, 2\,000 kg, zugelassene Händler,
-gültig bis 20.07.2026 18:00 Uhr\grqq. Das geschlossene Mandate darf nur
-erstellt werden, wenn jede Constraint deterministisch erfüllt ist. Die
-aktuelle AP2-Spezifikation beschreibt Checkout und Payment Mandates sowie
-deren kryptographische Bindung an den Checkout \cite{ap2-spec,ap2-auth}.
-
-Die lokale Demo prüft Budget, kanonischen Warenkorb-Hash und Manipulation mit
-HMAC. Das Feld
-\texttt{COURSE\_DEMO\_ONLY\_NOT\_AP2\_CONFORMANT} verhindert eine
-Verwechslung mit einer echten AP2-Signatur. Produktionsfreigabe ist erst mit
-Trusted Surface und echten Mandates zulässig.
-
-\subsection{4. Dynamic Visualization mit A2UI und AG-UI}
-
-Der Agent sendet keine React- oder Flutter-Quelldatei. Stattdessen enthält
-\texttt{a2ui\_delivery\_card.json} eine A2UI-v1.0-\texttt{createSurface}-
-Nachricht mit dem offiziellen Basic Catalog, einer flachen Komponentenliste
-und einem getrennten Datenmodell. Der Client besitzt einen vertrauenswürdigen
-Katalog und mappt \texttt{Card}, \texttt{Column}, \texttt{Text} und
-\texttt{Divider} auf seine nativen Widgets. Dadurch ist das Payload
-frameworkunabhängig und enthält keinen ausführbaren Agentencode. Die A2UI
-v1.0 Candidate Specification beschreibt
-\texttt{createSurface}, \texttt{updateComponents},
-\texttt{updateDataModel} und \texttt{deleteSurface}
-\cite{a2ui-spec}.
-
-AG-UI transportiert den Lauf als geordneten Eventstrom. Die Abgabe emittiert:
+AG-UI übernimmt den Ereignisstrom zwischen Agenten-Backend und Frontend. Der
+Dispatcher sendet Start-, Fortschritts-, Zustands- und Abschlussereignisse.
+Die A2UI-Nachricht wird dabei als strukturiertes Custom Event transportiert:
 
 \begin{lstlisting}
 RUN_STARTED
-TEXT_MESSAGE_START
 STEP_STARTED -> TEXT_MESSAGE_CONTENT -> STEP_FINISHED
 STATE_SNAPSHOT
-CUSTOM(name="a2ui", value=<A2UI message>)
-TEXT_MESSAGE_END
+CUSTOM(name="a2ui", value=<delivery card>)
 RUN_FINISHED
 \end{lstlisting}
 
-AG-UI ist transportagnostisch; dieselben Events können als JSONL, SSE oder
-WebSocket-Frames übertragen werden. Lifecycle-, Text-, Tool- und
-State-Events folgen definierten Mustern \cite{agui-architecture,agui-events}.
-Die Statusmeldungen enthalten operative Begründungen (Datenquelle, erfüllte
-Constraints, Auswahlkriterium), aber keine verborgene Chain-of-Thought.
+Damit sieht der Benutzer während der Verarbeitung, ob Brückendaten,
+Wetterabfrage und Lieferantenverhandlung abgeschlossen wurden. AG-UI
+standardisiert hierfür einen transportunabhängigen, ereignisbasierten
+Ablauf \cite{agui}.
 
-\section{Exercise 2: Implementing the Dispatcher Swarm}
+\section{Umsetzung des Dispatcher Swarms}
 
-\subsection{Abgabestruktur}
-
-\begin{longtable}{p{0.38\textwidth}p{0.53\textwidth}}
-\toprule
-\textbf{Datei} & \textbf{Verantwortung}\\
-\midrule
-\texttt{agent.py} & Google-ADK-\texttt{root\_agent}, synchron definierter
-MCP-\texttt{McpToolset}, A2A-Verhandlung als Function Tool\\
-\texttt{bridge\_mcp\_server.py} & lokaler stdio-MCP-Server mit zwei
-Infrastrukturwerkzeugen\\
-\texttt{mcp\_client.py} & \texttt{initialize}, echte Tool-Discovery und
-Tool-Aufruf\\
-\texttt{agent\_cards/*.json} & A2A-1.0-Selbstauskünfte von Wetter- und
-Lieferantenagenten\\
-\texttt{a2a\_negotiation.py} & Skill-Matching, Angebotsabfrage,
-Constraint-Prüfung und Auswahl\\
-\texttt{payments.py} & klar markierter lokaler Manipulations- und Budgettest\\
-\texttt{agui\_stream.py} & AG-UI-kompatible JSONL-Ereignisse\\
-\texttt{a2ui\_delivery\_card.json} & einreichbares UI-Schema\\
-\texttt{run\_spreeland\_dispatcher.py} & vollständiger Offline-Lauf\\
-\texttt{tests/test\_spreeland\_}\newline\texttt{dispatcher.py} & fünf Integrations- und
-Strukturtests\\
-\bottomrule
-\end{longtable}
-
-Der ADK-Agent folgt dem vorgegebenen Starter:
-
-\begin{lstlisting}[language=Python]
-infrastructure_tools = McpToolset(
-    connection_params=StdioConnectionParams(
-        server_params=StdioServerParameters(
-            command=sys.executable,
-            args=[str(_server_script)]
-        )
-    )
-)
-
-root_agent = Agent(
-    name="Spreeland_Dispatcher",
-    model="gemini-2.5-flash",
-    tools=[infrastructure_tools, negotiate_supplier_agents],
-    instruction="Check bridges, consult agents, require AP2 approval."
-)
-\end{lstlisting}
-
-Die ADK-Dokumentation empfiehlt genau diese Kombination aus
-\texttt{McpToolset}, \texttt{StdioConnectionParams} und
-\texttt{StdioServerParameters}; der Toolset kann synchron in
-\texttt{agent.py} definiert und dadurch auch deployt werden
-\cite{adk-mcp}.
-
-\subsection{Deterministischer End-to-End-Lauf}
-
-Der Offline-Lauf ist absichtlich unabhängig von einem Gemini-Key. Er zeigt
-Protokollmechanik reproduzierbar, statt einen erfolgreichen Lauf durch eine
-Cloudverbindung nur zu behaupten:
+Der Google-ADK-Agent bindet den lokalen Infrastrukturserver als
+\texttt{McpToolset} ein. Der ausführbare Offline-Lauf benötigt keinen
+Cloud-Key und führt folgende Schritte aus:
 
 \begin{enumerate}
-  \item MCP entdeckt
-        \texttt{get\_bridge\_status} und
-        \texttt{get\_route\_capacity}.
-  \item Der Wetteragent wird über den Skill
-        \texttt{route-weather} gefunden. Er bewertet Lübbenau als
-        \texttt{LOW}, Vetschau als \texttt{MEDIUM} und Leipe als
-        \texttt{HIGH}.
-  \item Die Brücke SPB-014 ist offen, für 40\,t zugelassen und hat bei einem
-        6,8-t-Fahrzeug eine ausreichende Reserve. Die Route via Lübbenau wird
-        gewählt; die gesperrte Leipe-Brücke scheidet deterministisch aus.
-  \item Zwei Lieferanten werden über
-        \texttt{gherkin-wholesale} gefunden. Beide erfüllen Menge und
-        Bio-Zertifizierung. Bio-Spree kostet
-        $2\,000\cdot1{,}85+90=3\,790$ EUR; Lausitz kostet
-        $2\,000\cdot1{,}74+380=3\,860$ EUR. Bio-Spree gewinnt nach
-        niedrigstem Landed Cost.
-  \item 3\,790 EUR liegen innerhalb des Demo-Budgets von 4\,000 EUR.
-        Warenkorb-Hash und Demo-Signatur werden verifiziert; der Status weist
-        weiterhin auf die notwendige echte AP2-Freigabe hin.
-  \item Das Ergebnis wird als State Snapshot und A2UI-Karte gestreamt.
+  \item Entdeckung der MCP-Werkzeuge und Abfrage aller Brücken,
+  \item Discovery des Wetteragenten über seine Agent Card,
+  \item Auswahl einer offenen und wettergeeigneten Route,
+  \item Angebotsabfrage bei zwei Lieferantenagenten,
+  \item Budgetprüfung und Ausgabe der A2UI-Karte über AG-UI.
 \end{enumerate}
 
-\subsection{Ausführung und Verifikation}
+Im Beispieldatensatz wird die offene Brücke SPB-014 auf der Route über
+Lübbenau gewählt. Bio-Spree bietet 2\,000 kg Bio-Gurken einschließlich Fracht
+für 3\,790 EUR an; das zweite gültige Angebot liegt bei 3\,860 EUR. Daher
+wählt der Dispatcher Bio-Spree nach dem niedrigsten Gesamtpreis.
+
+Der Lauf kann im Projektverzeichnis reproduziert werden:
 
 \begin{lstlisting}
 uv sync
 uv run python run_spreeland_dispatcher.py
 uv run python run_spreeland_dispatcher.py --format ag-ui
-uv run pytest tests/test_spreeland_dispatcher.py -q
 \end{lstlisting}
 
-Der Testumfang prüft:
+Die geforderten Abgabeartefakte sind damit das vorliegende Design-Dokument,
+der Python-Quellcode und die Datei
+\texttt{a2ui\_delivery\_card.json}.
 
-\begin{itemize}
-  \item A2A-Agent-Card-Parsing und Gewinner der Verhandlung,
-  \item echten MCP-Subprozess, Discovery und Tool-Aufruf,
-  \item A2UI-Version, Root-Komponente, eindeutige IDs und Referenzen,
-  \item Erkennung eines manipulierten Warenkorbs,
-  \item vollständigen Dispatch-Flow und gewählte Brücke.
-\end{itemize}
+\renewcommand{\refname}{Quellen}
+\begin{thebibliography}{6}
+\small
 
-Für die optionale interaktive ADK-Weboberfläche wird
-\texttt{GOOGLE\_API\_KEY} gesetzt und \texttt{uv run adk web .}
-gestartet. Dieser Schritt benötigt als einziger einen externen Cloud-Key; der
-prüfbare Kern der Einreichung funktioniert ohne ihn.
-
-\section{Fehlerbehandlung, Emergenz und Skalierung}
-
-Interoperabilität beseitigt nicht die komplexe Dynamik eines
-Multi-Agenten-Systems. Sie macht sie jedoch beobachtbar und begrenzbar:
-
-\begin{itemize}
-  \item \textbf{Timeout und Circuit Breaker:} Wetter- und Händleragenten
-        erhalten Fristen. Bei Ausfall gibt es keine erfundene Antwort, sondern
-        einen degradierenden Status und einen alternativen Agenten.
-  \item \textbf{Deterministische Gates:} Traglast, Zertifikat, Menge, Budget,
-        Signaturen und Ablaufzeiten werden außerhalb des LLM geprüft.
-  \item \textbf{Idempotenz:} Task-, Checkout- und Zahlungs-IDs verhindern, dass
-        Retries doppelte Bestellungen erzeugen.
-  \item \textbf{Feedback-Loops:} Jede neue Brücken- oder Wetterlage löst
-        höchstens eine debouncte Neuplanung aus. Hysterese verhindert
-        Route-Flapping bei kleinen Risikoänderungen.
-  \item \textbf{Beobachtbarkeit:} AG-UI-Ereignisse korrelieren
-        \texttt{threadId}, \texttt{runId}, Schritt, Tool und A2A-Task. Audits
-        speichern Entscheidungen und Belege, nicht private Modellgedanken.
-  \item \textbf{Least Privilege:} Der Dispatcher darf lesen und planen. Kaufen
-        darf er erst nach einem gültigen AP2-Nachweis innerhalb der
-        Constraints.
-\end{itemize}
-
-Damit können einzelne Agentenangebote variieren, ohne dass daraus unkontrollierte
-Systemaktionen entstehen. Die Protokolle definieren die Leitplanken; harte
-Policies und Signaturprüfungen bleiben deterministischer Anwendungscode.
-
-\section{Ergebnis und Grenzen}
-
-Die Aufgabenstellung ist vollständig in drei geforderten Artefaktklassen
-umgesetzt: dieses Design-PDF, ausführbarer Python-Quelltext und ein
-A2UI-JSON-Schema. Die Demo beweist MCP-Discovery, A2A-Skill-Matching,
-Mehranbieter-Verhandlung, Routenwahl, Streaming sowie UI-Bindung.
-
-Nicht vorgetäuscht werden externe Systeme, die das Aufgabenblatt nicht
-bereitstellt: eine reale City-PostgreSQL-Instanz, öffentlich erreichbare A2A-
-und UCP-Endpunkte, Eigentümer-Zahlungsschlüssel und ein AP2 Trusted Surface.
-Die Austauschstellen sind in README und Code explizit markiert. Daher ist der
-lokale Lauf vollständig reproduzierbar, während eine reale Zahlung
-ordnungsgemäß blockiert bleibt, bis echte Autorität und Infrastruktur
-konfiguriert sind.
-
-\newpage
-\begin{thebibliography}{9}
-
-\bibitem{mcp-tools}
+\bibitem{mcp}
 Model Context Protocol: \emph{Tools}.\\
 \url{https://modelcontextprotocol.io/specification/draft/server/tools}
 
-\bibitem{a2a-spec}
+\bibitem{a2a}
 A2A Protocol Working Group: \emph{Agent2Agent Protocol Specification 1.0}.\\
 \url{https://a2a-protocol.org/latest/specification/}
 
-\bibitem{a2a-discovery}
-A2A Protocol Working Group: \emph{Agent Discovery}.\\
-\url{https://a2a-protocol.org/latest/topics/agent-discovery/}
-
-\bibitem{ucp-overview}
+\bibitem{ucp}
 Universal Commerce Protocol: \emph{Official Specification -- Overview}.\\
 \url{https://ucp.dev/latest/specification/overview/}
 
-\bibitem{ucp-guide}
-Google for Developers: \emph{Universal Commerce Protocol Guide}.\\
-\url{https://developers.google.com/merchant/ucp/guides}
-
-\bibitem{ap2-spec}
+\bibitem{ap2}
 Agent Payments Protocol: \emph{AP2 Specification}.\\
 \url{https://ap2-protocol.org/ap2/specification/}
 
-\bibitem{ap2-auth}
-Agent Payments Protocol: \emph{Agent Authorization Framework}.\\
-\url{https://ap2-protocol.org/ap2/agent_authorization/}
-
-\bibitem{a2ui-spec}
-A2UI Project: \emph{A2UI Protocol v1.0 Candidate}, aktualisiert am
-8. Juni 2026.\\
+\bibitem{a2ui}
+A2UI Project: \emph{A2UI Protocol v1.0 Candidate}.\\
 \url{https://github.com/a2ui-project/a2ui/blob/main/specification/v1_0/docs/a2ui_protocol.md}
 
-\bibitem{agui-architecture}
-AG-UI: \emph{Core Architecture}.\\
+\bibitem{agui}
+AG-UI: \emph{Core Architecture and Events}.\\
 \url{https://docs.ag-ui.com/concepts/architecture}
-
-\bibitem{agui-events}
-AG-UI: \emph{Events}.\\
-\url{https://docs.ag-ui.com/concepts/events}
-
-\bibitem{adk-mcp}
-Google Agent Development Kit: \emph{MCP Tools}.\\
-\url{https://adk.dev/tools-custom/mcp-tools/}
 
 \end{thebibliography}
 
